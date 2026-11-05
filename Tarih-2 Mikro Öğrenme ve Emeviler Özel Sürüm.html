@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tarih-2 Mikro Öğrenme & Emeviler Özel Sürüm</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --success: #10b981;
+      --danger: #ef4444;
+      --accent: #f59e0b;
+      --border: #334155;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 12px; }
+    .app-container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 16px; }
+
+    header {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 16px;
+      border-radius: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .brand { font-weight: 800; font-size: 1.1rem; color: #a5b4fc; display: flex; align-items: center; gap: 8px; }
+    .stats { display: flex; gap: 12px; }
+    .stat-badge {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .stat-badge.score { color: var(--accent); }
+    .stat-badge.count { color: #38bdf8; }
+
+    .nav-tabs { display: flex; gap: 6px; background: var(--card); padding: 6px; border-radius: 12px; border: 1px solid var(--border); }
+    .tab-btn {
+      flex: 1; padding: 10px 4px; border: none; background: transparent; color: var(--muted);
+      font-weight: 700; border-radius: 8px; cursor: pointer; transition: 0.2s; font-size: 0.82rem; text-align: center;
+    }
+    .tab-btn.active { background: var(--primary); color: white; }
+
+    .view-section { display: none; flex-direction: column; gap: 16px; }
+    .view-section.active { display: flex; }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2); position: relative; overflow: hidden;
+    }
+    .card-tag {
+      display: inline-block; padding: 4px 10px; background: rgba(99, 102, 241, 0.2); color: #a5b4fc;
+      border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 12px;
+    }
+    .card-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 12px; line-height: 1.4; color: #ffffff; }
+    
+    .options-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+    .option-btn {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 14px 16px;
+      border-radius: 12px; color: var(--text); font-size: 0.95rem; font-weight: 600; text-align: left;
+      cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center;
+    }
+    .option-btn:hover:not(:disabled) { background: rgba(255,255,255,0.08); border-color: var(--primary); }
+    .option-btn.correct { background: rgba(16, 185, 129, 0.2) !important; border-color: var(--success) !important; color: #6ee7b7; }
+    .option-btn.wrong { background: rgba(239, 68, 68, 0.2) !important; border-color: var(--danger) !important; color: #fca5a5; }
+
+    .explanation-box {
+      margin-top: 14px; padding: 12px; border-radius: 10px; background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3); color: #fef08a; font-size: 0.88rem; line-height: 1.4; display: none;
+    }
+
+    .yt-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px;
+      background: #ff000022; border: 1px solid #ff000055; color: #ff6b6b; border-radius: 10px;
+      font-weight: 700; font-size: 0.85rem; text-decoration: none; margin-top: 16px; transition: 0.2s;
+    }
+    .yt-btn:hover { background: #ff000044; }
+
+    .action-btn {
+      width: 100%; padding: 14px; background: var(--primary); border: none; border-radius: 12px;
+      color: white; font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.2s;
+    }
+    .action-btn:hover { background: var(--primary-hover); }
+
+    .summary-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .summary-item:last-child { border: none; }
+    .summary-item h4 { color: #a5b4fc; margin-bottom: 4px; }
+    .summary-item p { font-size: 0.88rem; color: var(--muted); line-height: 1.4; }
+
+    /* Canvas Simulator */
+    #emeviCanvas { width: 100%; height: 200px; background: #020617; border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); }
+    .sim-controls { display: flex; gap: 8px; margin-top: 8px; }
+    .sim-btn { flex: 1; padding: 8px; background: var(--primary); border: none; border-radius: 8px; color: white; font-weight: 700; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <header>
+    <div class="brand"><i class="fa-solid fa-graduation-cap"></i> Tarih-2 Mikro</div>
+    <div class="stats">
+      <div class="stat-badge count"><i class="fa-solid fa-list-check"></i> <span id="qCount">1/3000</span></div>
+      <div class="stat-badge score"><i class="fa-solid fa-star"></i> <span id="score">0</span> Puan</div>
+    </div>
+  </header>
+
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('quiz')">Soru Çöz (+2)</button>
+    <button class="tab-btn" onclick="switchTab('emevi')">Emeviler Özel Panel</button>
+    <button class="tab-btn" onclick="switchTab('notes')">Özet Notlar</button>
+  </div>
+
+  <!-- QUIZ SECTION -->
+  <div id="quiz" class="view-section active">
+    <div class="card">
+      <span class="card-tag" id="qCategory">Konu Derecesi</span>
+      <h2 class="card-title" id="qText">Soru Yükleniyor...</h2>
+      
+      <div class="options-grid" id="optionsGrid"></div>
+
+      <div id="explanationBox" class="explanation-box"></div>
+
+      <a id="ytQuizLink" href="#" target="_blank" class="yt-btn">
+        <i class="fa-brands fa-youtube"></i> Konuyu YouTube Shorts / Ders İzle
+      </a>
+    </div>
+
+    <button class="action-btn" id="nextBtn" onclick="nextQuestion()" style="display:none;">
+      Sıradaki Rastgele Soruya Geç <i class="fa-solid fa-arrow-right"></i>
+    </button>
+  </div>
+
+  <!-- EMEVILER CANVAS SIMULATOR -->
+  <div id="emevi" class="view-section">
+    <div class="card">
+      <span class="card-tag">Animasyonlu Özel Panel</span>
+      <h3 style="margin-bottom:8px; color:#fff;">Emeviler Dönemi & Fetih Haritası</h3>
+      <p style="font-size:0.85rem; color:var(--muted); margin-bottom:12px;">Fetihlerin genişlemesini ve Endülüs'e geçişi simülasyonda canlı inceleyin.</p>
+      
+      <canvas id="emeviCanvas"></canvas>
+      
+      <div class="sim-controls">
+        <button class="sim-btn" onclick="startSim()">Simülasyonu Başlat</button>
+        <button class="sim-btn" style="background:#475569;" onclick="resetSim()">Sıfırla</button>
+      </div>
+
+      <div style="margin-top:16px; font-size:0.85rem; color:#cbd5e1; line-height:1.5;">
+        <strong style="color:#a5b4fc;">Önemli Olaylar:</strong>
+        <ul style="padding-left:18px; margin-top:6px;">
+          <li>Şam başkent yapıldı.</li>
+          <li>Arapça ilk kez resmi dil ilan edildi.</li>
+          <li>İlk İslam parası bastırıldı.</li>
+          <li>711 Kadiks Savaşı ile İspanya (Endülüs) fethedildi.</li>
+          <li>Mevali (Arap olmayan Müslümanları ikinci sınıf görme) politikası uygulandı.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTES SECTION -->
+  <div id="notes" class="view-section">
+    <div class="card">
+      <span class="card-tag">Tarih-2 Özeti</span>
+      <h3 style="margin-bottom:12px; color:#fff;">Önemli Konu Notları</h3>
+      
+      <div id="summaryList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const rawTopics = [
+    {
+      title: "Eski Çağ Medeniyetleri",
+      concept: "Hiyeroglif, Çivi Yazısı ve Alfabe",
+      key: "Mısırlılar duvar yazısı olan **Hiyeroglif**i kullanmış, Fenikeliler ise günümüz alfabesinin temelini atmıştır.",
+      qText: "Duvar yazısı olarak bilinen Hiyeroglif simgelerini geliştiren ve Mısır medeniyetiyle özdeşleşen yazı türünü kullanan toplum hangisidir?",
+      options: ["Mısırlılar", "Sümerler", "Hititler", "Yunanlar"],
+      correct: 0,
+      exp: "Hiyeroglif, Eski Mısır'da taşlar ve duvarlar üzerine yazılan resim yazısıdır.",
+      ytQuery: "Mısır Hiyeroglif Tarih 2 Ders"
+    },
+    {
+      title: "Konargöçer Türkler",
+      concept: "Geçim Kaynakları ve Yaşam Tarzı",
+      key: "Konargöçer Türk toplulukları hayvancılıkla uğraşmış, ürettikleri keçeleri, yünleri ve giysileri satarak geçim sağlamıştır.",
+      qText: "Konargöçer Türklerin hayvancılık ürünleri (keçe, yün, dokuma) ticareti yapması temel olarak aşağıdakilerden hangisiyle ilgilidir?",
+      options: ["Geçim Kaynakları", "Hukuk Kuralları", "Dini İnançlar", "Askeri Teşkilat"],
+      correct: 0,
+      exp: "Hayvancılık ve buna bağlı ürünlerin üretimi konargöçer toplumların temel geçim kaynağıdır.",
+      ytQuery: "Konargöçer Türk Yaşamı Tarih 2"
+    },
+    {
+      title: "Germen Kavimleri Göçü",
+      concept: "Coğrafi ve İklimsel Zorluklar",
+      key: "Orman ve bataklıklarla kaplı, soğuk bölgelerde yaşayan Germen kavimleri, yaşamı zorlaştıran **coğrafi** etkenler nedeniyle göç etmiştir.",
+      qText: "Germen kavimlerinin yaşadığı yerlerin bataklık, soğuk ve tarıma elverişsiz olması göçlerin hangi nedenini ortaya koyar?",
+      options: ["Coğrafi Nedenler", "Siyasi Nedenler", "Demografik Etkenler", "Dini Nedenler"],
+      correct: 0,
+      exp: "Bataklık, iklim ve arazi şartları doğrudan coğrafi faktörler arasında yer alır.",
+      ytQuery: "Kavimler Göçü Nedenleri Tarih"
+    },
+    {
+      title: "Türk Göçleri & Devlet Yapısı",
+      concept: "Siyasi Teşekküller",
+      key: "Türklerin sürekli yeni yurtlar araması ve bağımsızlık arzusu, güçlü siyasi oluşumlar kurmalarını kolaylaştırmıştır.",
+      qText: "Türk milletinin farklı coğrafyalarda izler bırakması ve yurt araması aşağıdakilerden hangisine zemin hazırlamıştır?",
+      options: ["Güçlü siyasi teşekküller kurmalarına", "Ordu gücünün zayıflamasına", "Kültürlerinin yok olmasına", "Türk tarihinin tek merkezden incelenmesine"],
+      correct: 0,
+      exp: "Türkler gittikleri yerlerde yeni ve güçlü devletler (siyasi teşekküller) kurmuşlardır.",
+      ytQuery: "Türklerin Göçleri Tarih 2"
+    },
+    {
+      title: "Kast Sistemi (Hindistan)",
+      concept: "Toplumsal Sınıflar & Siyasi Birlik",
+      key: "Hindistan'daki Kast sistemi toplum arasında kesin çizgiler oluşturarak **Siyasi Birliğin** sağlanmasını engellemiştir.",
+      qText: "Hindistan'daki Kast sisteminin katı toplumsal katmanları aşağıdakilerden hangisinin engellenmesine sebep olmuştur?",
+      options: ["Siyasi Birliğin Sağlanması", "Tarımın Gelişmesi", "Nüfus Artışı", "Dış Ticaret"],
+      correct: 0,
+      exp: "Kast sistemi toplumu böldüğü için millet bilincinin ve siyasi birliğin doğmasını engellemiştir.",
+      ytQuery: "Hindistan Kast Sistemi Tarih"
+    },
+    {
+      title: "Uygurlar & Maniheizm",
+      concept: "Bögü Kağan ve Yerleşik Hayat",
+      key: "Bögü Kağan'ın Maniheizm dinini kabul etmesiyle Uygurlar et yemeyi bırakmış ve **Yerleşik Hayata** geçmiştir.",
+      qText: "Uygur Hükümdarı Bögü Kağan'ın Maniheizm dinini benimsemesinin en temel toplumsal sonucu hangisidir?",
+      options: ["Yerleşik hayata geçilmesi", "Savaşçılık özelliklerinin artması", "Hayvansal gıda tüketiminin tavan yapması", "Boyların tek bayrak altında toplanması"],
+      correct: 0,
+      exp: "Maniheizm dini et yemeyi ve savaşmayı yasakladığı için Uygurlar tarıma ve yerleşik hayata yönelmiştir.",
+      ytQuery: "Uygurlar Maniheizm Bögü Kağan"
+    },
+    {
+      title: "Dört Halife Dönemi",
+      concept: "Yönetim Şekli & Saltanat",
+      key: "Dört Halife döneminde halifeler seçimle belirlenirken Emevilerle birlikte sistem **Saltanata** dönüşmüştür.",
+      qText: "Dört Halife Döneminde halifenin seçimle gelip sonrasında Emevilerle babadan oğula geçmesi neyin göstergesidir?",
+      options: ["Halifeliğin saltanata dönüştüğünün", "İslam devletinin sınırlarının daraldığının", "Yetkilerin tamamen kısıtlandığının", "Fetihlerin tamamen durduğunun"],
+      correct: 0,
+      exp: "Muaviye'nin oğlu Yezid'i veliaht tayin etmesiyle halifelik babadan oğula geçen saltanat sistemine dönüşmüştür.",
+      ytQuery: "Dört Halife Dönemi ve Saltanat"
+    },
+    {
+      title: "İslam Medeniyeti (Endülüs)",
+      concept: "Avrupa'ya Etkileri & Rönesans",
+      key: "İspanya'da kurulan **Endülüs** Emevi devleti, Avrupa'da Rönesans hareketlerinin altyapısını hazırlamıştır.",
+      qText: "Bugünkü İspanya topraklarında kurularak Avrupa'yı İslam kültürüyle tanıtan ve Rönesans'a zemin hazırlayan medeniyet havzası hangisidir?",
+      options: ["Endülüs", "Mâverâünnehir", "Bilâdüşşam", "Horasan"],
+      correct: 0,
+      exp: "Endülüs (İspanya), bilim ve felsefeyi Avrupa'ya taşıyarak Rönesans'ın doğuşunda rol oynamıştır.",
+      ytQuery: "Endülüs Emevileri Avrupa Etkisi"
+    }
+  ];
+
+  let currentScore = 0;
+  let solvedCount = 0;
+  const TOTAL_TARGET = 3000;
+  let currentQuestionObj = null;
+
+  function generateQuestionPool() {
+    const base = rawTopics[Math.floor(Math.random() * rawTopics.length)];
+    
+    // Shuffle options
+    let opts = [...base.options];
+    let correctText = opts[base.correct];
+    opts.sort(() => Math.random() - 0.5);
+    let newCorrectIndex = opts.indexOf(correctText);
+
+    return {
+      category: base.title,
+      qText: base.qText,
+      options: opts,
+      correct: newCorrectIndex,
+      exp: base.exp,
+      ytQuery: base.ytQuery
+    };
+  }
+
+  function loadQuestion() {
+    if (solvedCount >= TOTAL_TARGET) {
+      solvedCount = 0;
+    }
+
+    currentQuestionObj = generateQuestionPool();
+    document.getElementById("qCategory").innerText = currentQuestionObj.category;
+    document.getElementById("qText").innerText = currentQuestionObj.qText;
+    document.getElementById("ytQuizLink").href = `https://www.youtube.com/results?search_query=${encodeURIComponent(currentQuestionObj.ytQuery)}`;
+    
+    const expBox = document.getElementById("explanationBox");
+    expBox.style.display = "none";
+    expBox.innerHTML = "";
+
+    const optionsGrid = document.getElementById("optionsGrid");
+    optionsGrid.innerHTML = "";
+
+    currentQuestionObj.options.forEach((opt, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "option-btn";
+      btn.innerHTML = `<span>${String.fromCharCode(65 + idx)}) ${opt}</span> <i class="fa-regular fa-circle"></i>`;
+      btn.onclick = () => selectAnswer(idx, btn);
+      optionsGrid.appendChild(btn);
+    });
+
+    document.getElementById("nextBtn").style.display = "none";
+  }
+
+  function selectAnswer(selectedIdx, btnElement) {
+    const allBtns = document.querySelectorAll(".option-btn");
+    allBtns.forEach(btn => btn.disabled = true);
+
+    const expBox = document.getElementById("explanationBox");
+
+    if (selectedIdx === currentQuestionObj.correct) {
+      btnElement.classList.add("correct");
+      btnElement.querySelector("i").className = "fa-solid fa-circle-check";
+      currentScore += 2; // +2 Puan
+      document.getElementById("score").innerText = currentScore;
+    } else {
+      btnElement.classList.add("wrong");
+      btnElement.querySelector("i").className = "fa-solid fa-circle-xmark";
+      
+      allBtns[currentQuestionObj.correct].classList.add("correct");
+      allBtns[currentQuestionObj.correct].querySelector("i").className = "fa-solid fa-circle-check";
+
+      // Show detailed explanation on wrong answer
+      expBox.style.display = "block";
+      expBox.innerHTML = `<strong>Açıklama:</strong> ${currentQuestionObj.exp}`;
+    }
+
+    solvedCount++;
+    document.getElementById("qCount").innerText = `${solvedCount}/${TOTAL_TARGET}`;
+    document.getElementById("nextBtn").style.display = "block";
+  }
+
+  function nextQuestion() {
+    loadQuestion();
+  }
+
+  function switchTab(tabId) {
+    document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+    document.querySelectorAll(".view-section").forEach(sec => sec.classList.remove("active"));
+
+    if (tabId === 'quiz') {
+      document.querySelectorAll(".tab-btn")[0].classList.add("active");
+      document.getElementById("quiz").classList.add("active");
+    } else if (tabId === 'emevi') {
+      document.querySelectorAll(".tab-btn")[1].classList.add("active");
+      document.getElementById("emevi").classList.add("active");
+      initCanvas();
+    } else {
+      document.querySelectorAll(".tab-btn")[2].classList.add("active");
+      document.getElementById("notes").classList.add("active");
+      renderNotes();
+    }
+  }
+
+  function renderNotes() {
+    const list = document.getElementById("summaryList");
+    list.innerHTML = "";
+    rawTopics.forEach(t => {
+      const item = document.createElement("div");
+      item.className = "summary-item";
+      item.innerHTML = `
+        <h4>${t.title} - ${t.concept}</h4>
+        <p>${t.key}</p>
+        <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(t.ytQuery)}" target="_blank" style="color:#a5b4fc; font-size:0.8rem; font-weight:700; display:inline-block; margin-top:6px; text-decoration:none;">
+          <i class="fa-brands fa-youtube"></i> İlgili YouTube Videosunu İzle
+        </a>
+      `;
+      list.appendChild(item);
+    });
+  }
+
+  /* EMEVILER CANVAS ANIMATION */
+  let animId = null;
+  let progress = 0;
+
+  function initCanvas() {
+    const canvas = document.getElementById("emeviCanvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    drawMap(ctx, 0);
+  }
+
+  function drawMap(ctx, p) {
+    const w = ctx.canvas.width;
+    const h = ctx.canvas.height;
+    ctx.clearRect(0,0,w,h);
+
+    // Background Map Simple Represent
+    ctx.fillStyle = "#1e293b";
+    ctx.fillRect(0,0,w,h);
+
+    // Damascus (Şam) Origin
+    ctx.fillStyle = "#f59e0b";
+    ctx.beginPath();
+    ctx.arc(w*0.7, h*0.6, 6, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "10px sans-serif";
+    ctx.fillText("Şam (Başkent)", w*0.7 - 25, h*0.6 + 18);
+
+    // Expansion Lines
+    ctx.strokeStyle = "#6366f1";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(w*0.7, h*0.6);
+    
+    // North Africa & Spain Expansion
+    let currentX = w*0.7 - (w*0.55 * (p/100));
+    let currentY = h*0.6 - (h*0.2 * (p/100));
+    ctx.lineTo(currentX, currentY);
+    ctx.stroke();
+
+    if (p > 80) {
+      ctx.fillStyle = "#10b981";
+      ctx.beginPath();
+      ctx.arc(w*0.15, h*0.35, 8, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = "#6ee7b7";
+      ctx.font = "bold 11px sans-serif";
+      ctx.fillText("711 Endülüs (İspanya)", w*0.15 - 30, h*0.35 - 12);
+    }
+  }
+
+  function startSim() {
+    if (animId) cancelAnimationFrame(animId);
+    progress = 0;
+    const canvas = document.getElementById("emeviCanvas");
+    const ctx = canvas.getContext("2d");
+
+    function animate() {
+      progress += 0.8;
+      drawMap(ctx, Math.min(progress, 100));
+      if (progress < 100) {
+        animId = requestAnimationFrame(animate);
+      }
+    }
+    animate();
+  }
+
+  function resetSim() {
+    if (animId) cancelAnimationFrame(animId);
+    progress = 0;
+    initCanvas();
+  }
+
+  // Init
+  loadQuestion();
+</script>
+</body>
+</html>
